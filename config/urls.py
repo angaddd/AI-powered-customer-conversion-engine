@@ -9,6 +9,7 @@ from apps.events.views import EventTrackView, EventViewSet
 from apps.leads.views import LeadViewSet
 from apps.messaging.views import MessageTemplateViewSet, MessageLogViewSet
 from apps.ai_engine.views import AIInsightViewSet
+from apps.events.views import TrackingScriptView
 
 router = DefaultRouter()
 router.register("companies", CompanyViewSet, basename="company")
@@ -23,6 +24,7 @@ router.register("ai-insights", AIInsightViewSet, basename="ai-insight")
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/auth/", include("apps.authentication.urls")),
+    path("api/tracker/<str:public_key>.js", TrackingScriptView.as_view(), name="tracking-script"),
     path("api/events/track/", EventTrackView.as_view(), name="event-track"),
     path("api/", include(router.urls)),
 ]

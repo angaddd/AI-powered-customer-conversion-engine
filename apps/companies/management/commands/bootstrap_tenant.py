@@ -1,9 +1,8 @@
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 
-from apps.automations.models import AutomationRule
 from apps.companies.models import Company, CompanyMembership
-from apps.messaging.models import MessageTemplate
+from apps.companies.services import ensure_company_defaults
 
 
 class Command(BaseCommand):
@@ -38,46 +37,7 @@ class Command(BaseCommand):
         user.save()
         CompanyMembership.objects.get_or_create(company=company, user=user, defaults={"role": "owner"})
 
-        MessageTemplate.objects.get_or_create(
-            company=company,
-            channel="email",
-            name="cart_reminder",
-            defaults={
-                "subject": "Still thinking it over, {{ name }}?",
-                "body": "Your cart is waiting. Complete your purchase today and use code SAVE10.",
-                "variables": ["name"],
-            },
-        )
-        MessageTemplate.objects.get_or_create(
-            company=company,
-            channel="sms",
-            name="hot_lead_sms",
-            defaults={
-                "body": "Hi {{ name }}, thanks for browsing. Reply here if you need help choosing the right option.",
-                "variables": ["name"],
-            },
-        )
-
-        AutomationRule.objects.get_or_create(
-            company=company,
-            name="Cart reminder email",
-            defaults={
-                "trigger_type": "event_based",
-                "conditions": {"event": "add_to_cart"},
-                "actions": [{"type": "send_email", "template": "cart_reminder"}],
-                "cooldown_minutes": 120,
-            },
-        )
-        AutomationRule.objects.get_or_create(
-            company=company,
-            name="Hot lead SMS",
-            defaults={
-                "trigger_type": "score_based",
-                "conditions": {"intent_score_greater_than": 70},
-                "actions": [{"type": "send_sms", "template": "hot_lead_sms"}],
-                "cooldown_minutes": 240,
-            },
-        )
+        ensure_company_defaults(company)
 
         self.stdout.write(self.style.SUCCESS(
             f"Tenant ready without dummy events. Login: {options['username']} / {options['password']}. Public key: {company.public_key}"

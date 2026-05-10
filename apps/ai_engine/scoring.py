@@ -21,6 +21,12 @@ def score_lead(lead):
     score += lead.total_checkout_attempts * 30
     score += lead.total_purchases * 100
 
+    if lead.name:
+        score += 5
+    if lead.email:
+        score += 15
+    if lead.phone:
+        score += 10
     if lead.total_sessions >= 2:
         score += 15
     if lead.total_cart_adds and not lead.total_purchases:
@@ -33,4 +39,3 @@ def score_lead(lead):
     lead.intent_category = category_for_score(score, lead.total_purchases)
     lead.save(update_fields=["intent_score", "intent_category", "updated_at"])
     return score
-

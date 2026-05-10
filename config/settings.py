@@ -61,12 +61,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.getenv("DB_NAME", BASE_DIR / "db.sqlite3"),
-        "USER": os.getenv("DB_USER", ""),
-        "PASSWORD": os.getenv("DB_PASSWORD", ""),
-        "HOST": os.getenv("DB_HOST", ""),
-        "PORT": os.getenv("DB_PORT", ""),
+        "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.mysql"),
+        "NAME": os.getenv("DB_NAME", "ai_crm"),
+        "USER": os.getenv("DB_USER", "ai_crm"),
+        "PASSWORD": os.getenv("DB_PASSWORD", "ai_crm"),
+        "HOST": "" if os.getenv("DB_SOCKET") else os.getenv("DB_HOST", "127.0.0.1"),
+        "PORT": "" if os.getenv("DB_SOCKET") else os.getenv("DB_PORT", "3306"),
         "OPTIONS": {"unix_socket": os.getenv("DB_SOCKET")} if os.getenv("DB_SOCKET") else {},
     }
 }
@@ -97,6 +97,8 @@ CELERY_TASK_ROUTES = {
     "apps.ai_engine.tasks.*": {"queue": "ai"},
     "apps.automations.tasks.*": {"queue": "automations"},
 }
+
+TRACK_EVENTS_ASYNC = os.getenv("TRACK_EVENTS_ASYNC", "0") == "1"
 
 CACHES = {
     "default": {
